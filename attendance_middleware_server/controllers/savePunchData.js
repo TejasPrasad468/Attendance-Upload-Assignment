@@ -1,4 +1,6 @@
 const { getClient } = require('../utils/redisClient');
+const { addAttendanceJobProvider } = require('../utils/queue');
+const { param } = require('../routes/devicePunchRouter');
 
 savePunchData = async (req, res) => {
   // handle request
@@ -12,6 +14,12 @@ savePunchData = async (req, res) => {
     }
 	else {
 		await client.set(userKey, JSON.stringify(req.validatedData),  'EX', 60 );
+		console.log(JSON.stringify(req.validatedData));
+		let params = {
+			userId: req.validatedData.userId,
+			punchTime: req.validatedData.timestamp
+		};
+		await addAttendanceJobProvider(params);
 		res.json({ success: true, message: 'Punch stored in Redis' });
 	}
   }
