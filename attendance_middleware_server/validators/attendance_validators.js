@@ -14,15 +14,13 @@ const attendanceSchema = z.object({
     // Example EMP102, EMP999 → pattern check
     .regex(/^EMP\d{3}$/, "userId must follow EMP### format"),
 
-  timestamp: z
-    .string({
-      required_error: "timestamp is required",
-    })
-    .transform((value) => {
-      const iso = new Date(value).toISOString();
-      if (iso === "Invalid Date") throw new Error("Invalid timestamp format");
-      return iso; // Convert to ISO
-    }),
+	timestamp: z
+	.string()
+	.transform((value) => {
+		const date = new Date(value);
+		if (isNaN(date.getTime())) throw new Error("Invalid timestamp format");
+		return date.toISOString();
+	}),
 
   type: z
     .string({
