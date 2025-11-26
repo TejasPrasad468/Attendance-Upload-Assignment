@@ -14,16 +14,16 @@ async function getAttendanceQueue() {
   return attendanceQueue;
 }
 
-async function addAttendanceJobProvider({ userId, punchTime }) {
-	console.log(userId, punchTime);
+async function addAttendanceJobProvider({ logId }) {
+	// console.log(userId, punchTime);
   const queue = await getAttendanceQueue();
-  const logId = `${userId}_${punchTime}`;
+  // const logId = `${userId}_${punchTime}`;
 
   await queue.add(
     "attendanceJob",
-    { userId, punchTime },
+    {logId: logId.toString()},
     {
-      jobId: logId,
+      jobId: logId.toString(),
       attempts: 3,
       backoff: 5000,
       removeOnComplete: true,

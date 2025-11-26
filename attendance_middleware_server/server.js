@@ -1,6 +1,9 @@
 const express = require('express');
 const app = express();
 const devicePunchRouter = require("./routes/devicePunchRouter");
+const dbConnection = require("./db/dbConnection");
+
+dbConnection();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
