@@ -1,9 +1,10 @@
 const validateInput = (schema) => (req, res, next) => {
   try {
     const validatedData = schema.parse(req.body);
-    req.validatedData = validatedData;   // pass sanitized data forward
+    req.validatedData = validatedData;  
     next();
-  } catch (error) {
+  } 
+  catch (error) {
     return res.status(400).json({
       success: false,
       message: "Validation failed",

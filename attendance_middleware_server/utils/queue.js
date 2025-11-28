@@ -1,23 +1,22 @@
-// utils/queue.js
 const { Queue } = require("bullmq");
 const { getClient } = require("./redisClient");
 
 let attendanceQueue;
 
+// For Redis connection to store userdata 
 async function getAttendanceQueue() {
   if (!attendanceQueue) {
-    const client = await getClient();
+    const redisClient = await getClient();
     attendanceQueue = new Queue("attendance_queue", {
-      connection: client,
+      connection: redisClient,
     });
   }
   return attendanceQueue;
 }
 
-async function addAttendanceJobProvider({ logId }) {
-	// console.log(userId, punchTime);
+// For BullMQ to store retry data
+async function addAttendanceJobProvider({ logId }) { 
   const queue = await getAttendanceQueue();
-  // const logId = `${userId}_${punchTime}`;
 
   await queue.add(
     "attendanceJob",

@@ -1,60 +1,69 @@
-const { Worker } = require('bullmq');
-const {getClient} = require("./utils/redisClient");
-const PunchLog = require("./models/punchLogsModel");
+const { Worker } = require("bullmq");
 const axios = require("axios");
-const dbConnection = require("./db/dbConnection")
+const PunchLog = require("./models/punchLogsModel");
+const { getClient } = require("./utils/redisClient");
+const dbConnection = require("./db/dbConnection");
+const path = require("path");
+require("dotenv").config({ path: path.resolve(__dirname, "../.env")});
 
+dbConnection(); // connect DB 
 
-dbConnection(); // IMPORTANT!
+// Fetch punch log safely
+async function fetchPunchLog(id) {
+  const log = await PunchLog.findById(id);
+  if (!log) {
+	throw new Error(`PunchLog not found: ${id}`)
+  }
+  return log;
+};
 
-const worker = new Worker("attendance_queue", async (job) => {
-		console.log("Processing Job:", job.id);
-		// Do something with job
-		const punchData = await PunchLog.findById(job.data.logId);
-		console.log(punchData);
-		if (!punchData) {
-			console.log("PunchLog not found:", job.data.logId);
-			throw new Error("PunchLog not found");
-		}
-		try {
-			console.log("Sending to CRM...");
-			const res = await axios.post(
-				"http://localhost:5000/crm/attendance/punch",
-				punchData.toObject(),
-				{ timeout: 5000 }
-			);
-			console.log("Response " + res.status );
-			await PunchLog.updateOne(
-				{ _id: job.data.logId },
-				{ status: "synced" }
-			);
+// API call to CRM server
+async function syncAttendanceAPI(data) {
+  let res = await axios.post(
+    `${process.env.CRM_API}/crm/attendance/punch`,
+    data
+  );
+  return res;
+};
 
-			await job.remove();
-			console.log("Synced & Job removed");
-		} catch (err) {
-			console.log("CRM Error:", err.message);
+// Update punch status
+async function updatePunchStatus(id, status, retryCount = 0) {
+  console.log(`Job ${id} marked as ${status}`);
+  await PunchLog.updateOne(
+    { _id: id },
+    { status, retryCount }
+  );
+};
 
-			const left = job.opts.attempts - job.attemptsMade;
+// Handle final failure (after all retries)
+async function handleFinalFailure(job) {
+  await updatePunchStatus(job.data.logId, "failed", job.attemptsMade);
+};
 
-			console.log("Attempts Left:", left);
+const worker = new Worker(
+  "attendance_queue",
+  async (job) => {
+    const attemptsLeft = job.opts.attempts - job.attemptsMade;
+    const punchData = await fetchPunchLog(job.data.logId);
+    try {
+      const response = await syncAttendanceAPI(punchData);
+      if (response.status === 200 || response.status === 201 || response.status === 409) {
+        await updatePunchStatus(job.data.logId, "synced");
+        return "Synced Successfully";
+      }
 
-			if (left <= 1) {
-				console.log("All retries failed → Marking DB as FAILED");
+      // Non-200 status
+      if (attemptsLeft <= 1) await handleFinalFailure(job);
+      throw new Error("API did not return success");
 
-				await PunchLog.updateOne(
-					{ _id: job.data.logId },
-					{ status: "failed", retryCount: job.attemptsMade }
-				);
-			}
-
-			throw err; // Let BullMQ retry
-		}
-
-		throw new Error("API failed");
-	},
-	{
-		connection: getClient()
-	}
+    } 
+	catch (err) {
+	  console.log("Error from worker side " + err);
+      if (attemptsLeft <= 1) await handleFinalFailure(job);
+      throw err; // let BullMQ retry
+    }
+  },
+  { connection: getClient() }
 );
 
 module.exports = worker;

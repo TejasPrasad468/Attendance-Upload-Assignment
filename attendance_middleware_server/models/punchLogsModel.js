@@ -1,12 +1,3 @@
-// PunchLogs {
-// userId,
-// deviceId,
-// punchTime,
-// type,
-// status: "pending" | "synced" | "failed",
-// retryCount
-// }
-
 const mongoose = require("mongoose");
 
 const PunchLogSchema = new mongoose.Schema(

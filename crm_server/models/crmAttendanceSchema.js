@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const attendanceSchema = new mongoose.Schema({
+const crmAttendanceSchema = new mongoose.Schema({
     
     userId: {
         type: String,
@@ -22,7 +22,7 @@ const attendanceSchema = new mongoose.Schema({
     punchDate: {
         type: Date,
         required: true,
-        index: true   // helps fast lookups for specific day
+        index: true   
     },
 
     punchType: {
@@ -33,6 +33,6 @@ const attendanceSchema = new mongoose.Schema({
 
 }, { timestamps: true });
 
-const AttendanceModel = mongoose.model('Attendance', attendanceSchema);
+const AttendanceModel = mongoose.model('Attendance', crmAttendanceSchema);
 
 module.exports = AttendanceModel;

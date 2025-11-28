@@ -1,13 +1,12 @@
-// utils/redisClient.js
 const Redis = require("ioredis");
 
 let client; // singleton
 
 function getClient() {
   if (!client) {
-    client = new Redis("rediss://default:ATxbAAIncDI5NWYyMTc4MGM5NzA0MDQ5YjAzNDMzNmQ1YmQyYzJmNHAyMTU0NTE@adapting-earwig-15451.upstash.io:6379", 
+    client = new Redis(process.env.REDIS_URL, 
       {
-        maxRetriesPerRequest: null,
+        maxRetriesPerRequest: null, // For bullmq worker we use this
         enableReadyCheck: false
       }
     );
@@ -19,5 +18,5 @@ function getClient() {
   return client;
 }
 
-getClient();
+// getClient();
 module.exports = { getClient };
