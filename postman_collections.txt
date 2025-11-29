@@ -1,0 +1,13 @@
+Postman collection:
+
+https://web.postman.co/workspace/My-Workspace~0dd2f5ea-6ffb-427c-8120-896b4cb626e0/collection/36963634-9b8a7f5b-8b02-4f95-84d6-a852c320af5e?action=share&source=copy-link&creator=36963634
+
+POST - http://localhost:4000/device/punch
+{
+  "deviceId": "DEV001",
+  "userId": "EMP789",
+  "timestamp": "2025-02-10T09:16:00",
+  "type": "in"
+}
+
+POST - http://localhost:5000/crm/attendance/punch

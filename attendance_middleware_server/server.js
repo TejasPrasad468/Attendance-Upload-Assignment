@@ -12,7 +12,7 @@ const PORT = process.env.MIDDLEWARE_PORT || 4000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use('/device/punch', devicePunchRouter);
+app.use('/device/punch/', devicePunchRouter);
 
 app.listen(PORT, () => {
     console.log(`Middleware server running on port ${PORT}`);
