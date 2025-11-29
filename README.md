@@ -84,7 +84,7 @@
 🎯 Conclusion
 
 1. This project is a complete Attendance Synchronization System with:
-2. Accurate time processing (ISO → UTC)
+2. Accurate time processing (UTC -> ISO)
 3. Queue-based retry mechanism
 4. Fast duplicate detection
 5. Clear separation of device → middleware → CRM responsibilities
