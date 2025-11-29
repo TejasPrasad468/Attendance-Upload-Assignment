@@ -3,7 +3,7 @@ const { getClient } = require("./redisClient");
 
 let attendanceQueue;
 
-// For Redis connection to store userdata 
+// For Redis connection to store userdata
 async function getAttendanceQueue() {
   if (!attendanceQueue) {
     const redisClient = await getClient();
@@ -15,7 +15,7 @@ async function getAttendanceQueue() {
 }
 
 // For BullMQ to store retry data
-async function addAttendanceJobProvider({ logId }) { 
+async function addAttendanceJobProvider({ logId }) {
   const queue = await getAttendanceQueue();
 
   await queue.add(
@@ -24,7 +24,7 @@ async function addAttendanceJobProvider({ logId }) {
     {
       jobId: logId.toString(),
       attempts: 3,
-      backoff: 5000,
+      backoff: 10000,
       removeOnComplete: true,
       removeOnFail: false,
     }

@@ -9,12 +9,12 @@ savePunchData = async (req, res) => {
 
     const exists = await redisClient.get(userKey);
     if (exists) {
-      const ttl = (await redisClient.ttl(userKey) * 1); 
+      const ttl = (await redisClient.ttl(userKey) * 1);
       return res.status(409).json({ success: false, message: `User already punched please try after ${ttl} seconds` });
     }
     else {
-      await redisClient.set(userKey, JSON.stringify(req.validatedData),  'EX', 5 );
-      
+      await redisClient.set(userKey, JSON.stringify(req.validatedData),  'EX', 60 );
+
       const savedLog = await PunchLog.collection.insertOne({
         userId: req.validatedData.userId,
         deviceId: req.validatedData.deviceId,

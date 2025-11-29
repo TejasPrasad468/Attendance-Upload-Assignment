@@ -6,7 +6,7 @@ const dbConnection = require("./db/dbConnection");
 const path = require("path");
 require("dotenv").config({ path: path.resolve(__dirname, "../.env")});
 
-dbConnection(); // connect DB 
+dbConnection(); // connect DB
 
 // Fetch punch log safely
 async function fetchPunchLog(id) {
@@ -20,7 +20,7 @@ async function fetchPunchLog(id) {
 // API call to CRM server
 async function syncAttendanceAPI(data) {
   let res = await axios.post(
-    `${process.env.CRM_API}/crm/attendance/punch`,
+    `${process.env.API}:${process.env.CRM_PORT}/crm/attendance/punch`,
     data
   );
   return res;
@@ -56,7 +56,7 @@ const worker = new Worker(
       if (attemptsLeft <= 1) await handleFinalFailure(job);
       throw new Error("API did not return success");
 
-    } 
+    }
 	catch (err) {
 	  console.log("Error from worker side " + err);
       if (attemptsLeft <= 1) await handleFinalFailure(job);
